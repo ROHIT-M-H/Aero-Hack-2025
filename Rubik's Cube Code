@@ -1,0 +1,83 @@
+class RubiksCube:
+    def __init__(self):
+        self.faces = {
+            'U': ['W'] * 9,
+            'D': ['Y'] * 9,
+            'F': ['G'] * 9,
+            'B': ['B'] * 9,
+            'L': ['O'] * 9,
+            'R': ['R'] * 9
+        }
+
+    def apply_move(self, move):
+        # Placeholder for rotation logic
+        print(f"Applied move: {move}")
+
+    def white_cross_is_done(self):
+        return all(self.faces['U'][i] == 'W' for i in [1, 3, 5, 7])
+
+    def solve_white_cross(self):
+        print("Solving white cross...")
+        while not self.white_cross_is_done():
+            self.apply_move('F')
+            self.apply_move('U')
+            self.apply_move("R'")
+
+    def solve_white_corners(self):
+        print("Solving white corners...")
+        self.apply_move('R')
+        self.apply_move('D')
+        self.apply_move("R'")
+
+    def solve_middle_layer(self):
+        print("Solving middle layer edges...")
+        self.apply_move('U')
+        self.apply_move('L')
+        self.apply_move("U'")
+        self.apply_move("L'")
+
+    def solve_yellow_cross(self):
+        print("Solving yellow cross...")
+        self.apply_move('F')
+        self.apply_move('R')
+        self.apply_move('U')
+        self.apply_move("R'")
+        self.apply_move("U'")
+        self.apply_move("F'")
+
+    def orient_yellow_corners(self):
+        print("Orienting yellow corners...")
+        self.apply_move('R')
+        self.apply_move('U')
+        self.apply_move("R'")
+        self.apply_move('U')
+        self.apply_move('R')
+        self.apply_move('U')
+        self.apply_move('U')
+        self.apply_move("R'")
+
+    def permute_last_layer(self):
+        print("Permuting last layer to finish cube...")
+        self.apply_move('U')
+        self.apply_move('R')
+        self.apply_move("U'")
+        self.apply_move("L'")
+        self.apply_move('U')
+        self.apply_move("R'")
+        self.apply_move("U'")
+        self.apply_move('L')
+
+    def solve(self):
+        print("Starting full beginner's method solver...")
+        self.solve_white_cross()
+        self.solve_white_corners()
+        self.solve_middle_layer()
+        self.solve_yellow_cross()
+        self.orient_yellow_corners()
+        self.permute_last_layer()
+        print("Cube solved using beginner's method!")
+
+
+# Example usage:
+cube = RubiksCube()
+cube.solve()
