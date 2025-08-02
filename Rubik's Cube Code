@@ -1,3 +1,5 @@
+import copy
+
 class RubiksCube:
     def __init__(self):
         self.faces = {
@@ -9,75 +11,61 @@ class RubiksCube:
             'R': ['R'] * 9
         }
 
+    def is_solved(self):
+        return all(all(facelet == face[0] for facelet in face) for face in self.faces.values())
+
     def apply_move(self, move):
-        # Placeholder for rotation logic
-        print(f"Applied move: {move}")
+        # Placeholder for actual cube manipulation logic
+        pass
 
-    def white_cross_is_done(self):
-        return all(self.faces['U'][i] == 'W' for i in [1, 3, 5, 7])
+    def get_all_moves(self):
+        return ['U', "U'", 'D', "D'", 'F', "F'", 'B', "B'", 'L', "L'", 'R', "R'"]
 
-    def solve_white_cross(self):
-        print("Solving white cross...")
-        while not self.white_cross_is_done():
-            self.apply_move('F')
-            self.apply_move('U')
-            self.apply_move("R'")
+    def heuristic(self):
+        # Simple heuristic: count number of facelets not in correct color
+        misplaced = 0
+        for face in self.faces:
+            color = self.faces[face][4]  # center color
+            misplaced += sum(1 for i in range(9) if self.faces[face][i] != color)
+        return misplaced // 8  # rough approximation
 
-    def solve_white_corners(self):
-        print("Solving white corners...")
-        self.apply_move('R')
-        self.apply_move('D')
-        self.apply_move("R'")
+    def ida_star(self):
+        threshold = self.heuristic()
 
-    def solve_middle_layer(self):
-        print("Solving middle layer edges...")
-        self.apply_move('U')
-        self.apply_move('L')
-        self.apply_move("U'")
-        self.apply_move("L'")
+        def search(path, g, threshold):
+            node = path[-1]
+            f = g + node.heuristic()
+            if f > threshold:
+                return f
+            if node.is_solved():
+                return 'FOUND'
+            min_cost = float('inf')
+            for move in node.get_all_moves():
+                child = copy.deepcopy(node)
+                child.apply_move(move)
+                if len(path) > 1 and child.faces == path[-2].faces:
+                    continue
+                path.append(child)
+                t = search(path, g + 1, threshold)
+                if t == 'FOUND':
+                    return 'FOUND'
+                if t < min_cost:
+                    min_cost = t
+                path.pop()
+            return min_cost
 
-    def solve_yellow_cross(self):
-        print("Solving yellow cross...")
-        self.apply_move('F')
-        self.apply_move('R')
-        self.apply_move('U')
-        self.apply_move("R'")
-        self.apply_move("U'")
-        self.apply_move("F'")
-
-    def orient_yellow_corners(self):
-        print("Orienting yellow corners...")
-        self.apply_move('R')
-        self.apply_move('U')
-        self.apply_move("R'")
-        self.apply_move('U')
-        self.apply_move('R')
-        self.apply_move('U')
-        self.apply_move('U')
-        self.apply_move("R'")
-
-    def permute_last_layer(self):
-        print("Permuting last layer to finish cube...")
-        self.apply_move('U')
-        self.apply_move('R')
-        self.apply_move("U'")
-        self.apply_move("L'")
-        self.apply_move('U')
-        self.apply_move("R'")
-        self.apply_move("U'")
-        self.apply_move('L')
-
-    def solve(self):
-        print("Starting full beginner's method solver...")
-        self.solve_white_cross()
-        self.solve_white_corners()
-        self.solve_middle_layer()
-        self.solve_yellow_cross()
-        self.orient_yellow_corners()
-        self.permute_last_layer()
-        print("Cube solved using beginner's method!")
+        path = [self]
+        while True:
+            t = search(path, 0, threshold)
+            if t == 'FOUND':
+                print("Cube solved with IDA*!")
+                return
+            if t == float('inf'):
+                print("No solution found.")
+                return
+            threshold = t
 
 
 # Example usage:
 cube = RubiksCube()
-cube.solve()
+cube.ida_star()
